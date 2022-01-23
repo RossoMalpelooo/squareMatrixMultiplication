@@ -13,59 +13,54 @@ void print(int n, int matrix[][n]) {
 
 int get_dim(){
   int dim;
-  printf("Inserire dimensione matrici; se A, b c M(nxn), n=");
+  printf("enter size of matrices: ");
   scanf("%d", &dim);
   return dim;
 }
 
-void matrixMultiplication(int n){
+void read_matrix(int dim, const char name[], int matrix[][dim]) {
 	FILE *fptr;
-	int matrixA[n][n], matrixB[n][n], num, matrixC[n][n];
 	
-	//salvataggio matrice A
-	fptr = fopen("matrixA.txt", "r");
-	for(int i=0; i<n; i++){
-	  for(int j=0; j<n; j++){
-	    fscanf(fptr, "%d", &num);
-	    matrixA[i][j] = num;
-	  }
-	}
+	fptr = fopen(name, "r");
+	for(int i = 0; i < dim; i++) 
+		for(int j = 0; j < dim; j++) 
+			fscanf(fptr, "%d", &matrix[i][j]);
 	fclose(fptr);
+}
 
-	//salvataggio matrice B
-	fptr = fopen("matrixB.txt", "r");
-	for(int i=0 ; i<n; i++){
-	  for(int j=0; j<n; j++){
-	    fscanf(fptr, "%d", &num);
-	    matrixB[i][j] = num;
-	  }
-	}
-	fclose(fptr);
+void matrixMultiplication(int dim, int matrixA[][dim], int matrixB[][dim], int matrixC[][dim]){
+	FILE *fptr;
 
-	//Moltiplicazione
-	for(int i=0; i<n; i++){ //i = colonna(a,b) e riga(c)
-	  for(int j=0; j<n; j++){ //j = riga(a,b) e colonna(c)
+	for(int i=0; i<dim; i++){ //i = colonna(a,b) e riga(c)
+	  for(int j=0; j<dim; j++){ //j = riga(a,b) e colonna(c)
 	    long long int sum = 0;
-	    for(int k=0; k<n; k++){
+	    for(int k=0; k<dim; k++){
 	      sum = sum + matrixA[i][k] * matrixB[k][j];
 	      matrixC[i][j] = sum;
 	    }
 	  }
 	}
 
-	print(n, matrixC);
+	print(dim, matrixC);
 }
 
 int main(int argc, char *argv[]){
         srand(time(NULL));
 	double time_spent = 0.0;
+	
+	int n = get_dim();
+	int matrixA[n][n], matrixB[n][n], matrixC[n][n];
+	const char nameA[] = "matrixA.txt";
+	const char nameB[] = "matrixB.txt";
+	
+	read_matrix(n, nameA, matrixA);
+	read_matrix(n, nameB, matrixB);
  
- 	int n = get_dim();
 	clock_t begin = clock();
-	matrixMultiplication(n);
+	matrixMultiplication(n, matrixA, matrixB, matrixC);
 	clock_t end = clock();
 	time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
  	time_spent = time_spent*1000;
-	printf("Tempo impiegato= %f ms\n", time_spent);
+	printf("time spent = %f ms\n", time_spent);
 	return 0;
 }

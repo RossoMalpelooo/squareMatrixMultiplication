@@ -1,11 +1,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <string.h>
 #include <stdio.h>
-#include <errno.h>
-#include <math.h>
 #include <time.h>
+
+void read_matrix(int dim, const char name[], int matrix[][dim]) {
+	FILE *fptr;
+	
+	fptr = fopen(name, "r");
+	for(int i = 0; i < dim; i++) 
+		for(int j = 0; j < dim; j++) 
+			fscanf(fptr, "%d", &matrix[i][j]);
+	fclose(fptr);
+}
 
 int main(int argc, char *argv[]) {
 	srand(time(NULL));
@@ -20,21 +27,10 @@ int main(int argc, char *argv[]) {
 	printf("enter size of matrices: ");
 	scanf("%d", &dim);
 	
-	clock_t begin = clock();
-	
 	int matrixA[dim][dim], matrixB[dim][dim], matrixC[dim][dim];
 	
-	fptr = fopen(name1, "r");
-	for(int i = 0; i < dim; i++) 
-		for(int j = 0; j < dim; j++) 
-			fscanf(fptr, "%d", &matrixA[i][j]);
-	fclose(fptr);
-	
-	fptr = fopen(name2, "r");
-	for(int i = 0; i < dim; i++) 
-		for(int j = 0; j < dim; j++) 
-			fscanf(fptr, "%d", &matrixB[i][j]);
-	fclose(fptr);
+	read_matrix(dim, name1, matrixA);
+	read_matrix(dim, name2, matrixB);
 	
 	/*
 	for(int i = 0; i < dim; i++) {
@@ -44,6 +40,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	*/
+	
+	clock_t begin = clock();
 	
 	int pids[dim][dim];
 	int pipes_for_process = 4;
@@ -112,7 +110,7 @@ int main(int argc, char *argv[]) {
 					
 				}
 				
-				printf("c(%d, %d) = %d\n", i, j, acc);
+				//printf("c(%d, %d) = %d\n", i, j, acc);
 				
 				return 0;
 			}
@@ -125,7 +123,7 @@ int main(int argc, char *argv[]) {
 	clock_t end = clock();
 	time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
 	time_spent = time_spent * 1000;
-	printf("Tempo impiegato = %f ms\n", time_spent);
+	printf("time spent = %f ms\n", time_spent);
 	
 	return 0;
 }
