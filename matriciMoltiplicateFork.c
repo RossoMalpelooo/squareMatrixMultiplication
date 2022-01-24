@@ -32,15 +32,6 @@ int main(int argc, char *argv[]) {
 	read_matrix(dim, name1, matrixA);
 	read_matrix(dim, name2, matrixB);
 	
-	/*
-	for(int i = 0; i < dim; i++) {
-		for(int j = 0; j < dim; j++) {
-			printf("a(%d, %d) = %d\n", i, j, matrixA[i][j]);
-			printf("b(%d, %d) = %d\n", i, j, matrixB[i][j]);
-		}
-	}
-	*/
-	
 	clock_t begin = clock();
 	
 	int pids[dim][dim];
@@ -59,7 +50,6 @@ int main(int argc, char *argv[]) {
 			if(pids[i][j] == 0) {
 				//child
 				
-				//int index = i*dim+j;
 				int indexA_r = i*dim+j;
 				int indexB_r = j*dim+i+dim*dim;
 				
@@ -110,7 +100,7 @@ int main(int argc, char *argv[]) {
 					
 				}
 				
-				//printf("c(%d, %d) = %d\n", i, j, acc);
+				printf("c(%d, %d) = %d\n", i, j, acc);
 				
 				return 0;
 			}

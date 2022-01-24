@@ -3,12 +3,9 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <time.h>
+#include <string.h>
 
-#define MAX_DIM_MUTEX 1024
 #define MAX_DIM_MATRIX 256
-
-pthread_mutex_t mutex_A[MAX_DIM_MUTEX];
-pthread_mutex_t mutex_B[MAX_DIM_MUTEX];
 
 int matrixA[MAX_DIM_MATRIX][MAX_DIM_MATRIX];
 int matrixB[MAX_DIM_MATRIX][MAX_DIM_MATRIX];
@@ -25,13 +22,19 @@ int get_dim() {
 	return n;
 }
 
-void read_matrix(int dim, const char name[], int matrix[][dim]) {
+void read_matrix(const char name[], int dim) {
 	FILE *fptr;
 	
 	fptr = fopen(name, "r");
-	for(int i = 0; i < dim; i++) 
-		for(int j = 0; j < dim; j++) 
-			fscanf(fptr, "%d", &matrix[i][j]);
+	for(int i = 0; i < dim; i++) {
+		for(int j = 0; j < dim; j++) {
+			if(strcmp(name, "matrixA.txt") == 0)
+				fscanf(fptr, "%d", &matrixA[i][j]);	
+			if(strcmp(name, "matrixB.txt") == 0) 
+				fscanf(fptr, "%d", &matrixB[i][j]);
+		}
+	}
+	
 	fclose(fptr);
 }
 
@@ -42,9 +45,8 @@ void* routine(void* args) {
 	int j = indexes->j;
 	int dim = indexes->dim;
 	
-	for(int k = 0; k < dim; k++) {
-		printf("i'm p(%d,%d) calculating a(%d,%d)*b(%d,%d)\n", i, j, i, k, k, j);
-	}
+	for(int k = 0; k < dim; k++) 
+		matrixC[i][j] += matrixA[i][k]*matrixB[k][j];
 	
 	return (void**)args;
 }
@@ -58,18 +60,12 @@ int main(int argc, void* argv[]) {
 	const char nameA[] = "matrixA.txt";
 	const char nameB[] = "matrixB.txt";
 	
-	read_matrix(dim, nameA, matrixA);
-	read_matrix(dim, nameB, matrixB);
+	read_matrix(nameA, dim);
+	read_matrix(nameB, dim);
 	
 	clock_t begin = clock();
 	
 	pthread_t threads[dim][dim];
-	int n_mutex = dim*dim*2;
-	
-	for(int i = 0; i < n_mutex; i++) {
-		pthread_mutex_init(&mutex_A[i], NULL);
-		pthread_mutex_init(&mutex_B[i], NULL);
-	}
 	
 	struct Indexes* indexes;
 	for(int i = 0; i < dim; i++) {
@@ -82,12 +78,15 @@ int main(int argc, void* argv[]) {
 		}
 	}
 	
+	printf("Matrix C = \n");
 	struct Indexes* res;
 	for(int i = 0; i < dim; i++) {
 		for(int j = 0; j < dim; j++) {
 			pthread_join(threads[i][j], (void*)&res);
 			free(res);
+			printf("%d ", matrixC[i][j]);
 		}
+		printf("\n");
 	}
 	
 	
